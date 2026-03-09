@@ -1,13 +1,12 @@
 
 import './App.css'
 
-function App() {
-
+export default function App() {
   return (
-    <>
-     
-    </>
+    <div style={{ color: '#e8f0f8', padding: '40px',
+                  fontFamily: 'Syne, sans-serif' }}>
+      🛡️ ExamGuard 
+    </div>
   )
 }
 
-export default App
