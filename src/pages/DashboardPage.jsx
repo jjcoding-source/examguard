@@ -1,18 +1,14 @@
 import { useAuth } from '../context/AuthContext'
 import Sidebar from '../components/Sidebar'
 import StatCard from '../components/StatCard'
-import {
-  AlertTriangle,
-  Clock,
-  Eye,
-} from 'lucide-react'
+import { AlertTriangle, Clock, Eye } from 'lucide-react'
 
 const MOCK_EXAMS = [
   {
     id: 1,
     name: 'Data Structures Midterm',
     code: 'CS301',
-    students: 48,
+    students: '48 / 52',
     remaining: '01:12',
     status: 'live',
   },
@@ -20,7 +16,7 @@ const MOCK_EXAMS = [
     id: 2,
     name: 'Algorithm Analysis',
     code: 'CS402',
-    students: 31,
+    students: '31 / 35',
     remaining: '00:47',
     status: 'live',
   },
@@ -28,7 +24,7 @@ const MOCK_EXAMS = [
     id: 3,
     name: 'Database Systems',
     code: 'CS505',
-    students: 22,
+    students: '22 enrolled',
     remaining: null,
     startsAt: '16:00 today',
     status: 'upcoming',
@@ -37,7 +33,7 @@ const MOCK_EXAMS = [
     id: 4,
     name: 'Operating Systems Final',
     code: 'CS601',
-    students: 55,
+    students: '55 appeared',
     remaining: null,
     status: 'ended',
   },
@@ -71,10 +67,10 @@ const MOCK_ALERTS = [
 ]
 
 const MOCK_TRUST = [
-  { name: 'Meera Pillai',  score: 94 },
-  { name: 'Akhil Das',     score: 88 },
-  { name: 'Kevin Park',    score: 61 },
-  { name: 'Riya Sharma',   score: 34 },
+  { name: 'Meera Pillai', score: 94 },
+  { name: 'Akhil Das',    score: 88 },
+  { name: 'Kevin Park',   score: 61 },
+  { name: 'Riya Sharma',  score: 34 },
 ]
 
 function getStatusBadge(status) {
@@ -123,6 +119,10 @@ function getTrustTextColor(score) {
 export default function DashboardPage() {
   const { user } = useAuth()
 
+  const isStudent    = user?.role === 'Student'
+  const isInstructor = user?.role === 'Instructor'
+  const isAdmin      = user?.role === 'Admin'
+
   return (
     <div className="flex min-h-screen bg-[#040d1a]">
 
@@ -130,194 +130,340 @@ export default function DashboardPage() {
 
       <main className="flex-1 p-8 overflow-y-auto">
 
-        {/* Page header */}
         <div className="mb-8">
           <h1 className="font-['Syne'] text-2xl font-bold
                          text-[#e8f0f8] mb-1">
             {user?.role} Dashboard
           </h1>
           <p className="text-sm text-[#8899b0]">
-            Monday, 09 March 2026 · 3 exams scheduled today
+            Monday, 09 March 2026 · Welcome back, {user?.name}
           </p>
         </div>
 
-        {/* Stats row */}
-        <div className="grid grid-cols-2 lg:grid-cols-4
-                        gap-4 mb-8">
-          <StatCard
-            label="ACTIVE EXAMS"
-            value="3"
-            sub="2 with live students"
-            valueColor="text-[#00e5ff]"
-          />
-          <StatCard
-            label="STUDENTS ONLINE"
-            value="142"
-            sub="18 joined recently"
-            valueColor="text-[#00e676]"
-          />
-          <StatCard
-            label="ALERTS TODAY"
-            value="27"
-            sub="5 flagged sessions"
-            valueColor="text-[#ffb020]"
-          />
-          <StatCard
-            label="FLAGGED SESSIONS"
-            value="5"
-            sub="Requires review"
-            valueColor="text-[#ff3b5c]"
-          />
-        </div>
-
-        <div className="grid grid-cols-1 lg:grid-cols-2
-                        gap-6 mb-6">
-
-          {/* Active exams */}
-          <div className="bg-[#0c1829] rounded-xl p-5
-                          border border-[rgba(0,229,255,0.08)]">
-
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="font-['Syne'] text-sm font-semibold
-                             text-[#e8f0f8]">
-                Active Exams
-              </h2>
-              <span className="font-['JetBrains_Mono'] text-[10px]
-                               px-2 py-0.5 rounded
-                               bg-[rgba(0,229,255,0.12)]
-                               text-[#00e5ff]
-                               border border-[rgba(0,229,255,0.25)]">
-                LIVE
-              </span>
+        {/* ── STUDENT ─────────────────────────────── */}
+        {isStudent && (
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-4
+                            gap-4 mb-8">
+              <StatCard
+                label="EXAMS TAKEN"
+                value="4"
+                sub="This semester"
+                valueColor="text-[#00e5ff]"
+              />
+              <StatCard
+                label="UPCOMING EXAMS"
+                value="2"
+                sub="Next: CS505 today"
+                valueColor="text-[#ffb020]"
+              />
+              <StatCard
+                label="AVG TRUST SCORE"
+                value="87%"
+                sub="Across all sessions"
+                valueColor="text-[#00e676]"
+              />
+              <StatCard
+                label="VIOLATIONS"
+                value="3"
+                sub="Total logged"
+                valueColor="text-[#ff3b5c]"
+              />
             </div>
 
-            <div className="flex flex-col divide-y
-                            divide-[rgba(0,229,255,0.08)]">
-              {MOCK_EXAMS.map((exam) => (
-                <div key={exam.id}
-                     className="flex items-center justify-between
-                                py-3 first:pt-0 last:pb-0">
-                  <div>
-                    <p className="text-sm font-medium
-                                  text-[#e8f0f8] mb-0.5">
-                      {exam.name}
-                    </p>
-                    <p className="font-['JetBrains_Mono'] text-[10px]
-                                  text-[#8899b0]">
-                      {exam.code} ·{' '}
-                      {exam.students} students ·{' '}
-                      {exam.remaining
-                        ? `${exam.remaining} remaining`
-                        : exam.startsAt
-                          ? `Starts ${exam.startsAt}`
-                          : 'Yesterday'}
-                    </p>
-                  </div>
-                  {getStatusBadge(exam.status)}
-                </div>
-              ))}
-            </div>
+            <div className="grid grid-cols-1 lg:grid-cols-2
+                            gap-6">
 
-          </div>
-
-          {/* Recent alerts */}
-          <div className="bg-[#0c1829] rounded-xl p-5
-                          border border-[rgba(0,229,255,0.08)]">
-
-            <div className="flex items-center justify-between mb-5">
-              <h2 className="font-['Syne'] text-sm font-semibold
-                             text-[#e8f0f8]">
-                Recent Alerts
-              </h2>
-              <span className="font-['JetBrains_Mono'] text-[10px]
-                               px-2 py-0.5 rounded
-                               bg-[rgba(255,59,92,0.10)]
-                               text-[#ff3b5c]">
-                5 new
-              </span>
-            </div>
-
-            <div className="flex flex-col gap-3">
-              {MOCK_ALERTS.map((alert) => (
-                <div key={alert.id}
-                     className="flex items-start gap-3">
-                  {alert.type === 'error' ? (
-                    <AlertTriangle
-                      size={14}
-                      className="text-[#ff3b5c] mt-0.5 flex-shrink-0"
-                      strokeWidth={2}
-                    />
-                  ) : (
-                    <Clock
-                      size={14}
-                      className="text-[#ffb020] mt-0.5 flex-shrink-0"
-                      strokeWidth={2}
-                    />
-                  )}
-                  <div>
-                    <p className="text-sm text-[#b0c2d8]">
-                      {alert.text}
-                    </p>
-                    <p className="font-['JetBrains_Mono'] text-[10px]
-                                  text-[#8899b0] mt-0.5">
-                      {alert.meta}
-                    </p>
-                  </div>
-                </div>
-              ))}
-            </div>
-
-          </div>
-
-        </div>
-
-        {/* Trust score bars */}
-        <div className="bg-[#0c1829] rounded-xl p-5
-                        border border-[rgba(0,229,255,0.08)]">
-
-          <div className="flex items-center justify-between mb-5">
-            <h2 className="font-['Syne'] text-sm font-semibold
-                           text-[#e8f0f8]">
-              Student Trust Scores — CS301 Midterm
-            </h2>
-            <Eye
-              size={14}
-              className="text-[#8899b0]"
-              strokeWidth={1.75}
-            />
-          </div>
-
-          <div className="flex flex-col gap-4">
-            {MOCK_TRUST.map((s) => (
-              <div key={s.name}>
-                <div className="flex justify-between
-                                text-sm mb-1.5">
-                  <span className="text-[#b0c2d8]">
-                    {s.name}
-                  </span>
-                  <span className={`font-['JetBrains_Mono']
-                                    text-[11px]
-                                    ${getTrustTextColor(s.score)}`}>
-                    {s.score}%
-                  </span>
-                </div>
-                <div className="h-1.5 bg-[#0f2040] rounded-full
-                                overflow-hidden">
-                  <div
-                    className={`h-full rounded-full
-                                transition-all duration-500
-                                ${getTrustColor(s.score)}`}
-                    style={{ width: `${s.score}%` }}
-                  />
+              <div className="bg-[#0c1829] rounded-xl p-5
+                              border border-[rgba(0,229,255,0.08)]">
+                <h2 className="font-['Syne'] text-sm font-semibold
+                               text-[#e8f0f8] mb-5">
+                  My Exams
+                </h2>
+                <div className="flex flex-col divide-y
+                                divide-[rgba(0,229,255,0.08)]">
+                  {MOCK_EXAMS.map((exam) => (
+                    <div key={exam.id}
+                         className="flex items-center justify-between
+                                    py-3 first:pt-0 last:pb-0">
+                      <div>
+                        <p className="text-sm font-medium
+                                      text-[#e8f0f8] mb-0.5">
+                          {exam.name}
+                        </p>
+                        <p className="font-['JetBrains_Mono'] text-[10px]
+                                      text-[#8899b0]">
+                          {exam.code} · {exam.students}
+                        </p>
+                      </div>
+                      {getStatusBadge(exam.status)}
+                    </div>
+                  ))}
                 </div>
               </div>
-            ))}
-          </div>
 
-        </div>
+              <div className="bg-[#0c1829] rounded-xl p-5
+                              border border-[rgba(0,229,255,0.08)]">
+                <h2 className="font-['Syne'] text-sm font-semibold
+                               text-[#e8f0f8] mb-5">
+                  My Trust Score History
+                </h2>
+                <div className="flex flex-col gap-4">
+                  {[
+                    { exam: 'CS301 Midterm',    score: 94, date: '09 Mar' },
+                    { exam: 'CS402 Quiz',        score: 88, date: '05 Mar' },
+                    { exam: 'CS505 Assignment',  score: 76, date: '01 Mar' },
+                    { exam: 'CS601 Final',       score: 91, date: '25 Feb' },
+                  ].map((s) => (
+                    <div key={s.exam}>
+                      <div className="flex justify-between
+                                      text-sm mb-1.5">
+                        <div>
+                          <span className="text-[#b0c2d8]">
+                            {s.exam}
+                          </span>
+                          <span className="font-['JetBrains_Mono']
+                                           text-[10px] text-[#8899b0]
+                                           ml-2">
+                            {s.date}
+                          </span>
+                        </div>
+                        <span className={`font-['JetBrains_Mono']
+                                          text-[11px]
+                                          ${getTrustTextColor(s.score)}`}>
+                          {s.score}%
+                        </span>
+                      </div>
+                      <div className="h-1.5 bg-[#0f2040] rounded-full
+                                      overflow-hidden">
+                        <div
+                          className={`h-full rounded-full
+                                      transition-all duration-500
+                                      ${getTrustColor(s.score)}`}
+                          style={{ width: `${s.score}%` }}
+                        />
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+          </>
+        )}
+
+        {/* ── INSTRUCTOR ───────────────────────────── */}
+        {isInstructor && (
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-4
+                            gap-4 mb-8">
+              <StatCard
+                label="ACTIVE EXAMS"
+                value="3"
+                sub="2 with live students"
+                valueColor="text-[#00e5ff]"
+              />
+              <StatCard
+                label="STUDENTS ONLINE"
+                value="142"
+                sub="18 joined recently"
+                valueColor="text-[#00e676]"
+              />
+              <StatCard
+                label="ALERTS TODAY"
+                value="27"
+                sub="5 flagged sessions"
+                valueColor="text-[#ffb020]"
+              />
+              <StatCard
+                label="FLAGGED SESSIONS"
+                value="5"
+                sub="Requires review"
+                valueColor="text-[#ff3b5c]"
+              />
+            </div>
+
+            <div className="grid grid-cols-1 lg:grid-cols-2
+                            gap-6 mb-6">
+
+              <div className="bg-[#0c1829] rounded-xl p-5
+                              border border-[rgba(0,229,255,0.08)]">
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="font-['Syne'] text-sm font-semibold
+                                 text-[#e8f0f8]">
+                    Active Exams
+                  </h2>
+                  <span className="font-['JetBrains_Mono'] text-[10px]
+                                   px-2 py-0.5 rounded
+                                   bg-[rgba(0,229,255,0.12)]
+                                   text-[#00e5ff]
+                                   border border-[rgba(0,229,255,0.25)]">
+                    LIVE
+                  </span>
+                </div>
+                <div className="flex flex-col divide-y
+                                divide-[rgba(0,229,255,0.08)]">
+                  {MOCK_EXAMS.map((exam) => (
+                    <div key={exam.id}
+                         className="flex items-center justify-between
+                                    py-3 first:pt-0 last:pb-0">
+                      <div>
+                        <p className="text-sm font-medium
+                                      text-[#e8f0f8] mb-0.5">
+                          {exam.name}
+                        </p>
+                        <p className="font-['JetBrains_Mono'] text-[10px]
+                                      text-[#8899b0]">
+                          {exam.code} · {exam.students} ·{' '}
+                          {exam.remaining
+                            ? `${exam.remaining} remaining`
+                            : exam.startsAt
+                              ? `Starts ${exam.startsAt}`
+                              : 'Yesterday'}
+                        </p>
+                      </div>
+                      {getStatusBadge(exam.status)}
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="bg-[#0c1829] rounded-xl p-5
+                              border border-[rgba(0,229,255,0.08)]">
+                <div className="flex items-center justify-between mb-5">
+                  <h2 className="font-['Syne'] text-sm font-semibold
+                                 text-[#e8f0f8]">
+                    Recent Alerts
+                  </h2>
+                  <span className="font-['JetBrains_Mono'] text-[10px]
+                                   px-2 py-0.5 rounded
+                                   bg-[rgba(255,59,92,0.10)]
+                                   text-[#ff3b5c]">
+                    5 new
+                  </span>
+                </div>
+                <div className="flex flex-col gap-3">
+                  {MOCK_ALERTS.map((alert) => (
+                    <div key={alert.id}
+                         className="flex items-start gap-3">
+                      {alert.type === 'error' ? (
+                        <AlertTriangle
+                          size={14}
+                          strokeWidth={2}
+                          className="text-[#ff3b5c] mt-0.5 flex-shrink-0"
+                        />
+                      ) : (
+                        <Clock
+                          size={14}
+                          strokeWidth={2}
+                          className="text-[#ffb020] mt-0.5 flex-shrink-0"
+                        />
+                      )}
+                      <div>
+                        <p className="text-sm text-[#b0c2d8]">
+                          {alert.text}
+                        </p>
+                        <p className="font-['JetBrains_Mono'] text-[10px]
+                                      text-[#8899b0] mt-0.5">
+                          {alert.meta}
+                        </p>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+            </div>
+
+            <div className="bg-[#0c1829] rounded-xl p-5
+                            border border-[rgba(0,229,255,0.08)]">
+              <div className="flex items-center justify-between mb-5">
+                <h2 className="font-['Syne'] text-sm font-semibold
+                               text-[#e8f0f8]">
+                  Student Trust Scores — CS301 Midterm
+                </h2>
+                <Eye size={14} strokeWidth={1.75}
+                     className="text-[#8899b0]" />
+              </div>
+              <div className="flex flex-col gap-4">
+                {MOCK_TRUST.map((s) => (
+                  <div key={s.name}>
+                    <div className="flex justify-between
+                                    text-sm mb-1.5">
+                      <span className="text-[#b0c2d8]">
+                        {s.name}
+                      </span>
+                      <span className={`font-['JetBrains_Mono']
+                                        text-[11px]
+                                        ${getTrustTextColor(s.score)}`}>
+                        {s.score}%
+                      </span>
+                    </div>
+                    <div className="h-1.5 bg-[#0f2040] rounded-full
+                                    overflow-hidden">
+                      <div
+                        className={`h-full rounded-full
+                                    transition-all duration-500
+                                    ${getTrustColor(s.score)}`}
+                        style={{ width: `${s.score}%` }}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </>
+        )}
+
+        {/* ── ADMIN ───────────────────────────────── */}
+        {isAdmin && (
+          <>
+            <div className="grid grid-cols-2 lg:grid-cols-4
+                            gap-4 mb-8">
+              <StatCard
+                label="TOTAL USERS"
+                value="284"
+                sub="12 added this month"
+                valueColor="text-[#00e5ff]"
+              />
+              <StatCard
+                label="TOTAL EXAMS"
+                value="47"
+                sub="This semester"
+                valueColor="text-[#00e676]"
+              />
+              <StatCard
+                label="ACTIVE SESSIONS"
+                value="142"
+                sub="Right now"
+                valueColor="text-[#ffb020]"
+              />
+              <StatCard
+                label="FLAGGED TODAY"
+                value="5"
+                sub="Needs review"
+                valueColor="text-[#ff3b5c]"
+              />
+            </div>
+
+            <div className="bg-[#0c1829] rounded-xl p-5
+                            border border-[rgba(0,229,255,0.08)]">
+              <h2 className="font-['Syne'] text-sm font-semibold
+                             text-[#e8f0f8] mb-4">
+                System Overview
+              </h2>
+              <p className="text-sm text-[#8899b0] leading-relaxed">
+                All systems operational. Visit the{' '}
+                <span className="text-[#00e5ff] cursor-pointer">
+                  Admin Panel
+                </span>{' '}
+                to manage users, roles, and system configuration.
+              </p>
+            </div>
+          </>
+        )}
 
       </main>
-
     </div>
   )
 }
