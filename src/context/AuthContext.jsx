@@ -36,7 +36,7 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-  const MOCK_ROLE = 'Instructor'
+  const MOCK_ROLE = 'Student'
 
   const mockUser = {
     id:    1,
