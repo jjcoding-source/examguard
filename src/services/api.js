@@ -1,7 +1,7 @@
 import axios from 'axios'
 
 const api = axios.create({
-  baseURL: 'https://localhost:7241/api',
+  baseURL: '/api',
   headers: {
     'Content-Type': 'application/json',
   },
@@ -40,25 +40,14 @@ export const authAPI = {
 }
 
 export const examAPI = {
-
-  getAll: () =>
-    api.get('/exams'),
-
-  getById: (id) =>
-    api.get(`/exams/${id}`),
-
-  create: (data) =>
-    api.post('/exams', data),
-
-  update: (id, data) =>
-    api.put(`/exams/${id}`, data),
-
-  delete: (id) =>
-    api.delete(`/exams/${id}`),
-
-  getQuestions: (examId) =>
-    api.get(`/exams/${examId}/questions`),
-
+  getAll:       ()           => api.get('/exams'),
+  getById:      (id)         => api.get(`/exams/${id}`),
+  create:       (data)       => api.post('/exams', data),
+  update:       (id, data)   => api.put(`/exams/${id}`, data),
+  delete:       (id)         => api.delete(`/exams/${id}`),
+  getQuestions: (id)         => api.get(`/exams/${id}/questions`),
+  addQuestion:  (id, data)   => api.post(`/exams/${id}/questions`, data),
+  deleteQuestion:(id, qId)   => api.delete(`/exams/${id}/questions/${qId}`),
 }
 
 export const sessionAPI = {

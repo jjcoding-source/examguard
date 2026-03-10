@@ -8,6 +8,7 @@ import {
   Monitor,
   PlayCircle,
   Eye,
+  Plus,
 } from 'lucide-react'
 
 function getStatusBadge(status) {
@@ -133,7 +134,7 @@ export default function ExamCard({ exam }) {
       {/* Action buttons */}
       <div className="flex gap-2 mt-auto">
 
-        {/* Instructor actions */}
+        {/* Instructor — Live */}
         {isInstructor && exam.status === 'Live' && (
           <>
             <button
@@ -149,29 +150,34 @@ export default function ExamCard({ exam }) {
               Monitor
             </button>
             <button
+              onClick={() => navigate(`/exam/${exam.id}/questions`)}
               className="px-3 py-2 rounded-lg text-xs
                          bg-transparent text-[#8899b0]
                          border border-[rgba(0,229,255,0.08)]
                          cursor-pointer hover:text-[#e8f0f8]
                          transition-colors"
             >
-              Details
+              Questions
             </button>
           </>
         )}
 
+        {/* Instructor — Upcoming */}
         {isInstructor && exam.status === 'Upcoming' && (
           <>
             <button
-              className="flex-1 py-2 rounded-lg text-xs
+              onClick={() => navigate(`/exam/${exam.id}/questions`)}
+              className="flex-1 flex items-center justify-center
+                         gap-1.5 py-2 rounded-lg text-xs
                          font-semibold font-['Syne']
-                         bg-[rgba(255,176,32,0.10)]
-                         text-[#ffb020]
-                         border border-[rgba(255,176,32,0.25)]
+                         bg-[rgba(0,229,255,0.08)]
+                         text-[#00e5ff]
+                         border border-[rgba(0,229,255,0.20)]
                          cursor-pointer hover:opacity-80
                          transition-opacity"
             >
-              Edit
+              <Plus size={12} strokeWidth={2} />
+              Questions
             </button>
             <button
               className="px-3 py-2 rounded-lg text-xs
@@ -180,28 +186,41 @@ export default function ExamCard({ exam }) {
                          cursor-pointer hover:text-[#e8f0f8]
                          transition-colors"
             >
-              Preview
+              Edit
             </button>
           </>
         )}
 
+        {/* Instructor — Ended */}
         {isInstructor && exam.status === 'Ended' && (
-          <button
-            onClick={() => navigate(`/session/${exam.id}/report`)}
-            className="flex-1 flex items-center justify-center
-                       gap-1.5 py-2 rounded-lg text-xs
-                       font-semibold font-['Syne']
-                       bg-transparent text-[#8899b0]
-                       border border-[rgba(0,229,255,0.08)]
-                       cursor-pointer hover:text-[#e8f0f8]
-                       transition-colors"
-          >
-            <Eye size={12} strokeWidth={1.75} />
-            View Report
-          </button>
+          <>
+            <button
+              onClick={() => navigate(`/session/${exam.id}/report`)}
+              className="flex-1 flex items-center justify-center
+                         gap-1.5 py-2 rounded-lg text-xs
+                         font-semibold font-['Syne']
+                         bg-transparent text-[#8899b0]
+                         border border-[rgba(0,229,255,0.08)]
+                         cursor-pointer hover:text-[#e8f0f8]
+                         transition-colors"
+            >
+              <Eye size={12} strokeWidth={1.75} />
+              View Report
+            </button>
+            <button
+              onClick={() => navigate(`/exam/${exam.id}/questions`)}
+              className="px-3 py-2 rounded-lg text-xs
+                         bg-transparent text-[#8899b0]
+                         border border-[rgba(0,229,255,0.08)]
+                         cursor-pointer hover:text-[#e8f0f8]
+                         transition-colors"
+            >
+              Questions
+            </button>
+          </>
         )}
 
-        {/* Student actions */}
+        {/* Student — Live */}
         {isStudent && exam.status === 'Live' && (
           <button
             onClick={() => navigate(`/exam/${exam.id}/take`)}
@@ -217,6 +236,7 @@ export default function ExamCard({ exam }) {
           </button>
         )}
 
+        {/* Student — Upcoming */}
         {isStudent && exam.status === 'Upcoming' && (
           <div className="flex-1 py-2 rounded-lg text-xs
                           text-center text-[#8899b0]
@@ -227,6 +247,7 @@ export default function ExamCard({ exam }) {
           </div>
         )}
 
+        {/* Student — Ended */}
         {isStudent && exam.status === 'Ended' && (
           <button
             className="flex-1 flex items-center justify-center

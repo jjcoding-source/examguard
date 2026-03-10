@@ -10,6 +10,7 @@ import MonitorPage        from './pages/MonitorPage'
 import SessionReportPage  from './pages/SessionReportPage'
 import AdminPage          from './pages/AdminPage'
 import UnauthorizedPage   from './pages/UnauthorizedPage'
+import QuestionsPage from './pages/QuestionsPage'
 
 export default function App() {
   return (
@@ -47,6 +48,12 @@ export default function App() {
           <Route path="/session/:sessionId/report" element={
             <ProtectedRoute roles={['Instructor', 'Admin']}>
               <SessionReportPage />
+            </ProtectedRoute>
+          } />
+
+          <Route path="/exam/:examId/questions" element={
+            <ProtectedRoute roles={['Instructor']}>
+              <QuestionsPage />
             </ProtectedRoute>
           } />
 
