@@ -20,23 +20,28 @@ export default function CreateUserModal({ onClose, onCreated }) {
   }
 
   async function handleSubmit(e) {
-    e.preventDefault()
+  e.preventDefault()
 
-    if (!form.name.trim())     return setError('Name is required.')
-    if (!form.email.trim())    return setError('Email is required.')
-    if (!form.password.trim()) return setError('Password is required.')
+  if (!form.name.trim())     return setError('Name is required.')
+  if (!form.email.trim())    return setError('Email is required.')
+  if (!form.password.trim()) return setError('Password is required.')
 
-    setLoading(true)
-    try {
-      await adminAPI.createUser(form)
-      onCreated()
-      onClose()
-    } catch {
-      setError('Failed to create user. Please try again.')
-    } finally {
-      setLoading(false)
-    }
+  setLoading(true)
+  try {
+    await adminAPI.createUser({
+      name:     form.name,
+      email:    form.email,
+      password: form.password,
+      role:     form.role,
+    })
+    onCreated()
+    onClose()
+  } catch {
+    setError('Failed to create user. Please try again.')
+  } finally {
+    setLoading(false)
   }
+}
 
   return (
     <div

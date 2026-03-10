@@ -1,89 +1,42 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { useAuth } from '../context/AuthContext'
 import Sidebar from '../components/Sidebar'
 import ExamCard from '../components/ExamCard'
 import CreateExamModal from '../components/CreateExamModal'
+import { examAPI } from '../services/api'
 import { Plus } from 'lucide-react'
 
 const FILTERS = ['All', 'Live', 'Upcoming', 'Ended']
-
-const MOCK_EXAMS = [
-  {
-    id: 1,
-    name: 'Data Structures Midterm',
-    code: 'CS301',
-    instructor: 'Prof. Alex Johnson',
-    students: '48 / 52',
-    duration: 2,
-    date: 'Today',
-    status: 'live',
-    avgTrust: 78,
-  },
-  {
-    id: 2,
-    name: 'Algorithm Analysis',
-    code: 'CS402',
-    instructor: 'Prof. Alex Johnson',
-    students: '31 / 35',
-    duration: 1.5,
-    date: 'Today',
-    status: 'live',
-    avgTrust: 65,
-  },
-  {
-    id: 3,
-    name: 'Database Systems',
-    code: 'CS505',
-    instructor: 'Prof. Alex Johnson',
-    students: '22 enrolled',
-    duration: 2.5,
-    date: '16:00 today',
-    status: 'upcoming',
-  },
-  {
-    id: 4,
-    name: 'Operating Systems Final',
-    code: 'CS601',
-    instructor: 'Prof. Alex Johnson',
-    students: '55 appeared',
-    duration: 3,
-    date: '08 Mar 2026',
-    status: 'ended',
-  },
-  {
-    id: 5,
-    name: 'Computer Networks',
-    code: 'CS504',
-    instructor: 'Prof. Alex Johnson',
-    students: '38 enrolled',
-    duration: 2,
-    date: '12 Mar 2026',
-    status: 'upcoming',
-  },
-  {
-    id: 6,
-    name: 'Software Engineering',
-    code: 'CS503',
-    instructor: 'Prof. Alex Johnson',
-    students: '41 appeared',
-    duration: 2,
-    date: '05 Mar 2026',
-    status: 'ended',
-  },
-]
 
 export default function ExamsListPage() {
   const { user } = useAuth()
   const isInstructor = user?.role === 'Instructor'
 
+  const [exams, setExams]         = useState([])
+  const [loading, setLoading]     = useState(true)
   const [activeFilter, setActiveFilter] = useState('All')
-  const [showModal, setShowModal]       = useState(false)
+  const [showModal, setShowModal] = useState(false)
 
-  const filtered = MOCK_EXAMS.filter(exam => {
+  useEffect(() => {
+    fetchExams()
+  }, [])
+
+  async function fetchExams() {
+    try {
+      const res = await examAPI.getAll()
+      setExams(res.data)
+    } catch {
+      console.error('Failed to fetch exams')
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const filtered = exams.filter(exam => {
     if (activeFilter === 'All')      return true
-    if (activeFilter === 'Live')     return exam.status === 'live'
-    if (activeFilter === 'Upcoming') return exam.status === 'upcoming'
-    if (activeFilter === 'Ended')    return exam.status === 'ended'
+    if (activeFilter === 'Live')     return exam.status === 'Live'
+    if (activeFilter === 'Upcoming') return exam.status === 'Upcoming'
+    if (activeFilter === 'Ended')    return exam.status === 'Ended'
     return true
   })
 
@@ -94,7 +47,6 @@ export default function ExamsListPage() {
 
       <main className="flex-1 p-8 overflow-y-auto">
 
-        {/* Page header */}
         <div className="flex items-start justify-between mb-8">
           <div>
             <h1 className="font-['Syne'] text-2xl font-bold
@@ -140,7 +92,6 @@ export default function ExamsListPage() {
               {filter}
             </button>
           ))}
-
           <span className="ml-auto font-['JetBrains_Mono']
                            text-[11px] text-[#8899b0]">
             {filtered.length} exams
@@ -148,7 +99,11 @@ export default function ExamsListPage() {
         </div>
 
         {/* Exams grid */}
-        {filtered.length > 0 ? (
+        {loading ? (
+          <div className="flex items-center justify-center py-24">
+            <p className="text-sm text-[#8899b0]">Loading exams...</p>
+          </div>
+        ) : filtered.length > 0 ? (
           <div className="grid grid-cols-1 md:grid-cols-2
                           xl:grid-cols-3 gap-4">
             {filtered.map(exam => (
@@ -173,7 +128,10 @@ export default function ExamsListPage() {
       {showModal && (
         <CreateExamModal
           onClose={() => setShowModal(false)}
-          onCreated={() => setShowModal(false)}
+          onCreated={() => {
+            setShowModal(false)
+            fetchExams()
+          }}
         />
       )}
 

@@ -36,28 +36,17 @@ export function AuthProvider({ children }) {
   const [isLoading, setIsLoading] = useState(true)
 
   useEffect(() => {
-  const MOCK_ROLE = 'Admin'
+  const storedToken = localStorage.getItem(TOKEN_KEY)
+  const storedUser  = localStorage.getItem(USER_KEY)
 
-  const mockUser = {
-    id:    1,
-    name:  MOCK_ROLE === 'Student'
-             ? 'Riya Sharma'
-             : MOCK_ROLE === 'Instructor'
-               ? 'Alex Johnson'
-               : 'System Admin',
-    email: MOCK_ROLE === 'Student'
-             ? 'riya@student.edu'
-             : MOCK_ROLE === 'Instructor'
-               ? 'alex@university.edu'
-               : 'admin@examguard.io',
-    role:  MOCK_ROLE,
+  if (storedToken && storedUser && !isTokenExpired(storedToken)) {
+    setToken(storedToken)
+    setUser(JSON.parse(storedUser))
+  } else {
+    localStorage.removeItem(TOKEN_KEY)
+    localStorage.removeItem(USER_KEY)
   }
-  const mockToken = 'mock-jwt-token-for-testing'
 
-  setUser(mockUser)
-  setToken(mockToken)
-  localStorage.setItem(TOKEN_KEY, mockToken)
-  localStorage.setItem('examguard_user', JSON.stringify(mockUser))
   setIsLoading(false)
 }, [])
 

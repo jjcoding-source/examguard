@@ -28,7 +28,7 @@ export default function LoginPage() {
     setError('') 
   }
 
-  async function handleSubmit(e) {
+ async function handleSubmit(e) {
   e.preventDefault()
   setError('')
 
@@ -36,46 +36,24 @@ export default function LoginPage() {
   if (!form.password.trim()) return setError('Password is required.')
 
   setLoading(true)
+  try {
+    const res = await authAPI.login({
+      email:    form.email.trim(),
+      password: form.password,
+      role:     selectedRole,
+    })
 
-  // TEMP: mock login for frontend testing
-  // Remove this block when backend is ready
-  await new Promise(resolve => setTimeout(resolve, 800))
+    login(res.data)
+    navigate(from || ROLE_REDIRECT[res.data.user.role], { replace: true })
 
-  const mockUsers = {
-    Student: {
-      token: 'mock-token-student',
-      user: {
-        id:    1,
-        name:  'Riya Sharma',
-        email: 'riya@student.edu',
-        role:  'Student',
-      },
-    },
-    Instructor: {
-      token: 'mock-token-instructor',
-      user: {
-        id:    2,
-        name:  'Alex Johnson',
-        email: 'alex@university.edu',
-        role:  'Instructor',
-      },
-    },
-    Admin: {
-      token: 'mock-token-admin',
-      user: {
-        id:    3,
-        name:  'System Admin',
-        email: 'admin@examguard.io',
-        role:  'Admin',
-      },
-    },
+  } catch (err) {
+    const msg =
+      err.response?.data?.message ||
+      'Invalid credentials. Please try again.'
+    setError(msg)
+  } finally {
+    setLoading(false)
   }
-
-  const data = mockUsers[selectedRole]
-  login(data)
-  navigate(from || ROLE_REDIRECT[data.user.role], { replace: true })
-
-  setLoading(false)
 }
 
   return (
