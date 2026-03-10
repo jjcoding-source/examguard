@@ -1,33 +1,36 @@
 import { useNavigate } from 'react-router-dom'
 import { useAuth } from '../context/AuthContext'
 import {
-  Clock,
   Users,
-  CalendarDays,
+  Clock,
+  Calendar,
   Radio,
-  MonitorPlay,
-  FileText,
-  Pencil,
+  Monitor,
+  PlayCircle,
+  Eye,
 } from 'lucide-react'
 
-function StatusBadge({ status }) {
-  if (status === 'live') {
+function getStatusBadge(status) {
+  if (status === 'Live') {
     return (
       <span className="flex items-center gap-1.5
                        font-['JetBrains_Mono'] text-[10px]
-                       text-[#00e5ff]">
-        <span className="w-1.5 h-1.5 rounded-full
-                         bg-[#00e5ff] animate-live-pulse" />
+                       text-[#00e5ff] px-2 py-0.5 rounded
+                       bg-[rgba(0,229,255,0.08)]
+                       border border-[rgba(0,229,255,0.20)]">
+        <Radio size={8} strokeWidth={2.5}
+               className="animate-live-pulse" />
         LIVE
       </span>
     )
   }
-  if (status === 'upcoming') {
+  if (status === 'Upcoming') {
     return (
       <span className="font-['JetBrains_Mono'] text-[10px]
                        px-2 py-0.5 rounded
                        bg-[rgba(255,176,32,0.10)]
-                       text-[#ffb020]">
+                       text-[#ffb020]
+                       border border-[rgba(255,176,32,0.25)]">
         UPCOMING
       </span>
     )
@@ -35,197 +38,210 @@ function StatusBadge({ status }) {
   return (
     <span className="font-['JetBrains_Mono'] text-[10px]
                      px-2 py-0.5 rounded
-                     bg-[#0f2040] text-[#8899b0]">
+                     bg-[#0f2040] text-[#8899b0]
+                     border border-[rgba(0,229,255,0.08)]">
       ENDED
     </span>
   )
 }
 
-function statusBarColor(status) {
-  if (status === 'live')     return 'bg-[#00e5ff]'
-  if (status === 'upcoming') return 'bg-[#ffb020]'
-  return 'bg-[#8899b0]'
+function getBorderColor(status) {
+  if (status === 'Live')     return 'border-[rgba(0,229,255,0.20)]'
+  if (status === 'Upcoming') return 'border-[rgba(255,176,32,0.20)]'
+  return 'border-[rgba(0,229,255,0.08)]'
+}
+
+function formatDate(dateStr) {
+  if (!dateStr) return '—'
+  return new Date(dateStr).toLocaleDateString('en-US', {
+    day:   'numeric',
+    month: 'short',
+    year:  'numeric',
+  })
+}
+
+function formatDuration(mins) {
+  if (!mins) return '—'
+  const h = Math.floor(mins / 60)
+  const m = mins % 60
+  if (h === 0) return `${m} mins`
+  if (m === 0) return `${h} hr${h > 1 ? 's' : ''}`
+  return `${h}h ${m}m`
 }
 
 export default function ExamCard({ exam }) {
-  const { user } = useAuth()
-  const navigate = useNavigate()
-
+  const navigate     = useNavigate()
+  const { user }     = useAuth()
   const isInstructor = user?.role === 'Instructor'
   const isStudent    = user?.role === 'Student'
 
   return (
-    <div className="relative bg-[#0c1829] rounded-xl
-                    border border-[rgba(0,229,255,0.08)]
-                    overflow-hidden flex flex-col">
+    <div className={`
+      flex flex-col bg-[#0c1829] rounded-xl p-5
+      border transition-all duration-150
+      hover:border-[rgba(0,229,255,0.25)]
+      ${getBorderColor(exam.status)}
+    `}>
 
-      <div className={`h-[3px] w-full ${statusBarColor(exam.status)}`} />
-
-      <div className="p-5 flex flex-col flex-1">
-
-        <div className="flex items-start justify-between mb-2">
-          <div>
-            <h3 className="font-['Syne'] text-base font-bold
-                           text-[#e8f0f8] mb-0.5">
-              {exam.name}
-            </h3>
-            <p className="font-['JetBrains_Mono'] text-[11px]
-                          text-[#8899b0]">
-              {exam.code} · {exam.instructor}
-            </p>
-          </div>
-          <StatusBadge status={exam.status} />
+      {/* Header row */}
+      <div className="flex items-start justify-between mb-3">
+        <div className="flex-1 min-w-0 pr-3">
+          <p className="font-['JetBrains_Mono'] text-[10px]
+                        text-[#00e5ff] mb-1">
+            {exam.code}
+          </p>
+          <h3 className="font-['Syne'] text-sm font-semibold
+                         text-[#e8f0f8] leading-snug">
+            {exam.title}
+          </h3>
         </div>
+        {getStatusBadge(exam.status)}
+      </div>
 
-        <div className="flex gap-5 mt-4 mb-5">
-          <div className="flex items-center gap-1.5
-                          text-[#8899b0]">
-            <Users size={12} strokeWidth={1.75} />
-            <span className="font-['JetBrains_Mono'] text-[11px]">
-              {exam.students}
-            </span>
-          </div>
+      {/* Instructor name */}
+      {exam.instructorName && (
+        <p className="text-[11px] text-[#8899b0] mb-3">
+          {exam.instructorName}
+        </p>
+      )}
 
-          <div className="flex items-center gap-1.5
-                          text-[#8899b0]">
-            <Clock size={12} strokeWidth={1.75} />
-            <span className="font-['JetBrains_Mono'] text-[11px]">
-              {exam.duration} hrs
-            </span>
-          </div>
+      {/* Meta row */}
+      <div className="flex items-center gap-4 mb-4">
+        <span className="flex items-center gap-1.5
+                         font-['JetBrains_Mono'] text-[11px]
+                         text-[#8899b0]">
+          <Users size={12} strokeWidth={1.75} />
+          {exam.studentCount ?? 0} students
+        </span>
+        <span className="flex items-center gap-1.5
+                         font-['JetBrains_Mono'] text-[11px]
+                         text-[#8899b0]">
+          <Clock size={12} strokeWidth={1.75} />
+          {formatDuration(exam.durationMinutes)}
+        </span>
+        <span className="flex items-center gap-1.5
+                         font-['JetBrains_Mono'] text-[11px]
+                         text-[#8899b0]">
+          <Calendar size={12} strokeWidth={1.75} />
+          {formatDate(exam.startTime)}
+        </span>
+      </div>
 
-          <div className="flex items-center gap-1.5
-                          text-[#8899b0]">
-            <CalendarDays size={12} strokeWidth={1.75} />
-            <span className="font-['JetBrains_Mono'] text-[11px]">
-              {exam.date}
-            </span>
-          </div>
-        </div>
+      {/* Divider */}
+      <div className="h-[1px] bg-[rgba(0,229,255,0.06)] mb-4" />
 
-        {/* Trust bar (live exams only) */}
-        {exam.status === 'live' && exam.avgTrust && (
-          <div className="mb-5">
-            <div className="flex justify-between mb-1.5">
-              <span className="font-['JetBrains_Mono'] text-[10px]
-                               text-[#8899b0]">
-                Avg. trust
-              </span>
-              <span className="font-['JetBrains_Mono'] text-[10px]
-                               text-[#00e676]">
-                {exam.avgTrust}%
-              </span>
-            </div>
-            <div className="h-1 bg-[#0f2040] rounded-full overflow-hidden">
-              <div
-                className="h-full bg-[#00e676] rounded-full"
-                style={{ width: `${exam.avgTrust}%` }}
-              />
-            </div>
-          </div>
-        )}
+      {/* Action buttons */}
+      <div className="flex gap-2 mt-auto">
 
-        <div className="flex-1" />
-
-        {/* Action buttons */}
-        <div className="flex gap-2 mt-4">
-
-          {/* Student actions */}
-          {isStudent && exam.status === 'live' && (
+        {/* Instructor actions */}
+        {isInstructor && exam.status === 'Live' && (
+          <>
             <button
-              onClick={() => navigate(`/exam/${exam.id}/take`)}
-              className="flex-1 py-2 rounded-lg text-xs
+              onClick={() => navigate(`/exam/${exam.id}/monitor`)}
+              className="flex-1 flex items-center justify-center
+                         gap-1.5 py-2 rounded-lg text-xs
                          font-semibold font-['Syne']
                          bg-[#00e5ff] text-[#040d1a]
                          border-none cursor-pointer
-                         transition-opacity duration-150
-                         hover:opacity-90"
+                         hover:opacity-90 transition-opacity"
             >
-              Join Exam
+              <Monitor size={12} strokeWidth={2} />
+              Monitor
             </button>
-          )}
+            <button
+              className="px-3 py-2 rounded-lg text-xs
+                         bg-transparent text-[#8899b0]
+                         border border-[rgba(0,229,255,0.08)]
+                         cursor-pointer hover:text-[#e8f0f8]
+                         transition-colors"
+            >
+              Details
+            </button>
+          </>
+        )}
 
-          {isStudent && exam.status === 'ended' && (
+        {isInstructor && exam.status === 'Upcoming' && (
+          <>
             <button
               className="flex-1 py-2 rounded-lg text-xs
-                         bg-transparent
-                         text-[#8899b0] cursor-pointer
-                         border border-[rgba(0,229,255,0.08)]">
-              View Result
+                         font-semibold font-['Syne']
+                         bg-[rgba(255,176,32,0.10)]
+                         text-[#ffb020]
+                         border border-[rgba(255,176,32,0.25)]
+                         cursor-pointer hover:opacity-80
+                         transition-opacity"
+            >
+              Edit
             </button>
-          )}
+            <button
+              className="px-3 py-2 rounded-lg text-xs
+                         bg-transparent text-[#8899b0]
+                         border border-[rgba(0,229,255,0.08)]
+                         cursor-pointer hover:text-[#e8f0f8]
+                         transition-colors"
+            >
+              Preview
+            </button>
+          </>
+        )}
 
-          {isStudent && exam.status === 'upcoming' && (
-            <p className="text-xs text-[#8899b0]
-                          font-['JetBrains_Mono'] py-2">
-              Starts {exam.date}
-            </p>
-          )}
+        {isInstructor && exam.status === 'Ended' && (
+          <button
+            onClick={() => navigate(`/session/${exam.id}/report`)}
+            className="flex-1 flex items-center justify-center
+                       gap-1.5 py-2 rounded-lg text-xs
+                       font-semibold font-['Syne']
+                       bg-transparent text-[#8899b0]
+                       border border-[rgba(0,229,255,0.08)]
+                       cursor-pointer hover:text-[#e8f0f8]
+                       transition-colors"
+          >
+            <Eye size={12} strokeWidth={1.75} />
+            View Report
+          </button>
+        )}
 
-          {/* Instructor actions */}
-          {isInstructor && exam.status === 'live' && (
-            <>
-              <button
-                onClick={() => navigate(`/exam/${exam.id}/monitor`)}
-                className="flex-1 flex items-center justify-center
-                           gap-1.5 py-2 rounded-lg text-xs
-                           font-semibold font-['Syne']
-                           bg-[#00e5ff] text-[#040d1a]
-                           border-none cursor-pointer
-                           hover:opacity-90 transition-opacity">
-                <MonitorPlay size={12} strokeWidth={2} />
-                Monitor
-              </button>
-              <button
-                className="flex-1 flex items-center justify-center
-                           gap-1.5 py-2 rounded-lg text-xs
-                           bg-transparent text-[#b0c2d8]
-                           border border-[rgba(0,229,255,0.08)]
-                           cursor-pointer">
-                <FileText size={12} strokeWidth={1.75} />
-                Details
-              </button>
-            </>
-          )}
+        {/* Student actions */}
+        {isStudent && exam.status === 'Live' && (
+          <button
+            onClick={() => navigate(`/exam/${exam.id}/take`)}
+            className="flex-1 flex items-center justify-center
+                       gap-1.5 py-2 rounded-lg text-xs
+                       font-semibold font-['Syne']
+                       bg-[#00e676] text-[#040d1a]
+                       border-none cursor-pointer
+                       hover:opacity-90 transition-opacity"
+          >
+            <PlayCircle size={12} strokeWidth={2} />
+            Join Exam
+          </button>
+        )}
 
-          {isInstructor && exam.status === 'upcoming' && (
-            <>
-              <button
-                className="flex-1 flex items-center justify-center
-                           gap-1.5 py-2 rounded-lg text-xs
-                           bg-transparent text-[#b0c2d8]
-                           border border-[rgba(0,229,255,0.08)]
-                           cursor-pointer">
-                <Pencil size={12} strokeWidth={1.75} />
-                Edit
-              </button>
-              <button
-                className="flex-1 flex items-center justify-center
-                           gap-1.5 py-2 rounded-lg text-xs
-                           bg-transparent text-[#b0c2d8]
-                           border border-[rgba(0,229,255,0.08)]
-                           cursor-pointer">
-                <FileText size={12} strokeWidth={1.75} />
-                Preview
-              </button>
-            </>
-          )}
+        {isStudent && exam.status === 'Upcoming' && (
+          <div className="flex-1 py-2 rounded-lg text-xs
+                          text-center text-[#8899b0]
+                          font-['JetBrains_Mono']
+                          bg-[#070f20]
+                          border border-[rgba(0,229,255,0.08)]">
+            Starts {formatDate(exam.startTime)}
+          </div>
+        )}
 
-          {isInstructor && exam.status === 'ended' && (
-            <>
-              <button
-                className="flex-1 flex items-center justify-center
-                           gap-1.5 py-2 rounded-lg text-xs
-                           bg-transparent text-[#b0c2d8]
-                           border border-[rgba(0,229,255,0.08)]
-                           cursor-pointer">
-                <FileText size={12} strokeWidth={1.75} />
-                Reports
-              </button>
-            </>
-          )}
+        {isStudent && exam.status === 'Ended' && (
+          <button
+            className="flex-1 flex items-center justify-center
+                       gap-1.5 py-2 rounded-lg text-xs
+                       font-semibold font-['Syne']
+                       bg-transparent text-[#8899b0]
+                       border border-[rgba(0,229,255,0.08)]
+                       cursor-pointer hover:text-[#e8f0f8]
+                       transition-colors"
+          >
+            <Eye size={12} strokeWidth={1.75} />
+            View Result
+          </button>
+        )}
 
-        </div>
       </div>
     </div>
   )

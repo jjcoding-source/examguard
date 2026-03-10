@@ -73,3 +73,8 @@ body {
 .status-dot.danger  { background: var(--danger);
                       box-shadow: 0 0 6px var(--danger); }
 .status-dot.warning { background: var(--warn); }
+
+input[type="date"],
+input[type="time"] {
+  color-scheme: dark;
+}
